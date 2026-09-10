@@ -1,0 +1,114 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.uv/
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# API keys / credentials
+*.pem
+*.key
+secrets/
+credentials/
+
+# =========================
+# Uvicorn / FastAPI
+# =========================
+*.log
+logs/
+
+# =========================
+# GenAI / ML
+# =========================
+models/
+checkpoints/
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.onnx
+
+# Vector databases / local indexes
+chroma/
+chroma_db/
+vector_db/
+*.faiss
+*.index
+
+# Uploaded/generated files
+uploads/
+outputs/
+generated/
+tmp/
+temp/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# IDE / Editors
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Testing / Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# =========================
+# Build / Packaging
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# Ruff / Mypy
+# =========================
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Node (if frontend exists)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Local databases
+# =========================
+*.db
+*.sqlite
+*.sqlite3.env
