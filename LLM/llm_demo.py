@@ -194,4 +194,4 @@ new_student = {'name':'Pulkit'} # the type is restricted we cannot write 32 in t
 
 student = Student(**new_student)
 
-print(type(student))
+print(student)
