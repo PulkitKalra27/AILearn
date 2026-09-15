@@ -1,0 +1,17 @@
+{
+    "name": null,
+    "input_variables": [
+        "chat_input",
+        "length_input",
+        "style_input"
+    ],
+    "optional_variables": [],
+    "output_parser": null,
+    "partial_variables": {},
+    "metadata": null,
+    "tags": null,
+    "template": "\n    Please analyze the performance and career of the cricket player named \"{chat_input}\" with the following specifications:\nExplanation Style: {style_input}\nExplanation Length: {length_input}\n\n1. Statistical & Technical Details:\n- Include relevant career statistics, strike rates, or bowling/batting averages if available.\n- Explain tactical concepts (like technique, captaincy formulas, or swing physics) using simple, intuitive code snippets or breakdown matrices where applicable.\n\n2. Analogies:\n- Use relatable analogies to simplify complex playing styles or career milestones.\n\nIf certain information or data is not available for this player, respond with: \"Insufficient information available\" instead of guessing.\nEnsure the analysis is clear, accurate, and aligned with the provided style and length.\n",
+    "template_format": "f-string",
+    "validate_template": false,
+    "_type": "prompt"
+}

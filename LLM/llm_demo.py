@@ -32,6 +32,9 @@
 # result = embedding.embed_documents(documents)
 
 # print(result)
+# 
+
+# print(result.content)
 
 # from langchain_openai import OpenAIEmbeddings
 # from dotenv import load_dotenv
@@ -76,7 +79,27 @@
 # from langchain_openrouter import ChatOpenRouter
 # import streamlit as st
 # from dotenv import load_dotenv
-# from langchain_core.prompts import PromptTemplate
+# from langchain_core.prompts import PromptTemplate,load_prompt
+# # template = PromptTemplate(
+# #     template ="""
+# #     Please analyze the performance and career of the cricket player named "{chat_input}" with the following specifications:
+# # Explanation Style: {style_input}
+# # Explanation Length: {length_input}
+
+# # 1. Statistical & Technical Details:
+# # - Include relevant career statistics, strike rates, or bowling/batting averages if available.
+# # - Explain tactical concepts (like technique, captaincy formulas, or swing physics) using simple, intuitive code snippets or breakdown matrices where applicable.
+
+# # 2. Analogies:
+# # - Use relatable analogies to simplify complex playing styles or career milestones.
+
+# # If certain information or data is not available for this player, respond with: "Insufficient information available" instead of guessing.
+# # Ensure the analysis is clear, accurate, and aligned with the provided style and length.
+# # """,
+# # input_variables=["chat_input", "style_input", "length_input"]
+# # )
+
+# # template.save('template.json')
 
 # load_dotenv()
 # model = ChatOpenRouter(model="openrouter/free")
@@ -89,39 +112,100 @@
 
 # length_input = st.selectbox( "Select Explanation Length", ["Short (1-2 paragraphs)", "Medium(3-5 paragraphs)", "Long (detailed explanation)"] )
 
-# template = PromptTemplate(
-#     template ="""
-#     Please analyze the performance and career of the cricket player named "{chat_input}" with the following specifications:
-# Explanation Style: {style_input}
-# Explanation Length: {length_input}
+# template = load_prompt('template.json') # benefit over f string
 
-# 1. Statistical & Technical Details:
-# - Include relevant career statistics, strike rates, or bowling/batting averages if available.
-# - Explain tactical concepts (like technique, captaincy formulas, or swing physics) using simple, intuitive code snippets or breakdown matrices where applicable.
-
-# 2. Analogies:
-# - Use relatable analogies to simplify complex playing styles or career milestones.
-
-# If certain information or data is not available for this player, respond with: "Insufficient information available" instead of guessing.
-# Ensure the analysis is clear, accurate, and aligned with the provided style and length.
-# """,
-# input_variables=["chat_input", "style_input", "length_input"]
-# )
-
-# prompt = template.invoke({
-#     'chat_input':chat_input,
-#     'style_input':style_input,
-#     'length_input':length_input
-# })
 
 # if st.button("Send"):
-#     result = model.invoke(prompt)
+#     chain = template | model  # benefit over f string
+
+#     result = chain.invoke({
+#         'chat_input':chat_input,
+#         'style_input':style_input,
+#         'length_input':length_input
+#     })
+#     # prompt = template.invoke({
+#     #     'chat_input':chat_input,
+#     #     'style_input':style_input,
+#     #     'length_input':length_input
+#     # })
+#     # result = model.invoke(prompt)
 #     st.write(result.content)
 
+# Chat Bot
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
 
-# 
+# load_dotenv()
 
-# print(result.content)
+# model = ChatOpenRouter(model="openrouter/free")
+# chat_history = []
+# while True:
+#     user_input = input('You: ')
+#     chat_history.append(user_input)
+#     if user_input == 'exit':
+#         break
+#     result = model.invoke(chat_history)
+#     chat_history.append(result.content)
+#     print('Ai: ',result.content)
+# print(chat_history)
+
+# Chat bot with Different Messages types 
+
+# from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# load_dotenv()
+
+# model = ChatOpenRouter(model="openrouter/free")
+
+# chat_history = [
+#     SystemMessage(content='You are a helpful assistant')
+# ]
+# while True:
+#     user_input = input('You: ')
+#     chat_history.append(HumanMessage(content=user_input))
+#     if user_input == 'exit':
+#         break
+#     result = model.invoke(chat_history)
+#     chat_history.append(AIMessage(content=result.content))
+#     print('Ai: ',result.content)
+# print(chat_history)
+# # result = model.invoke(messages)
+# # messages.append(AIMessage(content='result.content'))
+
+# # print(messages)
+
+# chatbot with chat prompt template
+# from langchain_core.prompts import ChatPromptTemplate
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# load_dotenv()
+
+# chat_template = ChatPromptTemplate([
+#     ('system','You are a helpful {domain} expert'),
+#     ('human','Explain in simple terms, what is {topic}')
+    
+# ])
+# prompt = chat_template.invoke({'domain':'cricket','topic':'Bat'})
+
+# print(prompt)
+
+#Message Placeholder 
+from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
+
+chat_template = ChatPromptTemplate([
+    ('system','You are a helpful customer support agent'),
+    MessagesPlaceholder(variable_name='chat_history'),
+    ('human','{query}') 
+])
+chat_history=[]
+with open('chat_history.txt') as h:
+    chat_history.extend(h.readlines())
+print(chat_history)
+
+prompt = chat_template.invoke({'chat_history': chat_history, 'query': 'Where is my refund'})
+
+print(prompt)
 
 # Structured Output 
 # using typeddict
@@ -141,7 +225,7 @@
 
 # load_dotenv()
 # model = ChatOpenRouter(model="openrouter/free")
-
+                
 # # schema
 # class Review(TypedDict):
 #     key_themes:Annotated[list[str],"Write down all the key themes discusses in the review in a list"]
@@ -182,16 +266,17 @@
 # # print(result)
 # print(result['summary'])
 # print(result['sentiment'])
-# print(result['name'])
+# print(result['
+
 
 #pydantic
 
-from pydantic import BaseModel
-class Student(BaseModel):
-    name : str
+# from pydantic import BaseModel
+# class Student(BaseModel):
+#     name : str
 
-new_student = {'name':'Pulkit'} # the type is restricted we cannot write 32 in this where as in typeddict this does not throw the error
+# new_student = {'name':'Pulkit'} # the type is restricted we cannot write 32 in this where as in typeddict this does not throw the error
 
-student = Student(**new_student)
+# student = Student(**new_student) # unpacks this as it is dictionary 
 
-print(student)
+# print(student)
