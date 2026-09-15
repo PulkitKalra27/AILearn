@@ -926,3 +926,764 @@ A high-level roadmap based on these topics:
 | LangChain    | Framework for building LLM applications                 |
 | LlamaIndex   | Framework focused heavily on data/knowledge integration |
 | Haystack     | Framework for building search and RAG applications      |
+
+---
+
+# 09/09/2026
+
+# Prompts
+
+A **prompt** is the input instruction, question, or information given to an LLM to guide its output.
+
+In simple terms:
+
+```text
+User Input / Instruction
+          ↓
+        Prompt
+          ↓
+         LLM
+          ↓
+       Output
+```
+
+The messages that we send to an LLM can be considered prompts.
+
+For example:
+
+```text
+Explain what Python decorators are.
+```
+
+This is a prompt because it provides an instruction to the model about what we want it to generate.
+
+---
+
+# Types of Prompts
+
+Prompts can broadly be thought of as:
+
+1. **Text-based prompts**
+2. **Multimodal prompts**
+
+## Text-Based Prompts
+
+Text-based prompts contain text as the input to the model.
+
+Example:
+
+```text
+Explain Generative AI in simple terms.
+```
+
+---
+
+## Multimodal Prompts
+
+Multimodal prompts can contain different types of information, such as:
+
+* Text
+* Images
+* Audio
+* Video
+
+For example:
+
+```text
+Image + Text Prompt
+        ↓
+       LLM
+        ↓
+    Description
+```
+
+A multimodal model can use multiple forms of input to understand the user's request.
+
+---
+
+# Importance of Prompt Changes
+
+A small change in a prompt can sometimes produce a significantly different output from the model.
+
+For example:
+
+### Prompt 1
+
+```text
+Explain Python.
+```
+
+### Prompt 2
+
+```text
+Explain Python to a beginner using a simple real-world example.
+```
+
+The second prompt provides additional instructions about:
+
+* Audience
+* Explanation level
+* Style
+* Example requirement
+
+Therefore, the model can produce a substantially different response.
+
+This is one of the reasons **Prompt Engineering** is an important part of Generative AI application development.
+
+---
+
+# Static vs Dynamic Prompts
+
+Prompts can also be understood as **static** or **dynamic** depending on how the application creates and sends them to the LLM.
+
+---
+
+## Static Prompt
+
+A **static prompt** is predefined by the developer and remains fixed or is selected from a predefined set of prompts.
+
+For example, a customer-support application may provide only specific operations:
+
+```text
+1. Check Order Status
+2. Cancel Order
+3. Request Refund
+4. Contact Support
+```
+
+The developer controls what kinds of requests the application supports.
+
+The user does not have complete freedom to construct any arbitrary prompt.
+
+### Simplified Flow
+
+```text
+Developer
+    ↓
+Predefined Prompts
+    ↓
+User Selects / Provides Input
+    ↓
+LLM
+    ↓
+Response
+```
+
+In a static-prompt system, the **developer has more control over the available instructions and supported interactions**.
+
+---
+
+# Dynamic Prompt
+
+A **dynamic prompt** is generated or modified at runtime based on user input, application data, or other variables.
+
+A general-purpose chatbot such as ChatGPT is an example of a system where users can provide many different types of instructions.
+
+For example:
+
+```text
+User Input
+    ↓
+Dynamic Prompt
+    ↓
+LLM
+    ↓
+Response
+```
+
+The user can decide what they want to ask, while the application can also add additional instructions or context.
+
+### Static vs Dynamic
+
+```text
+STATIC
+
+Developer
+    ↓
+Predefined Prompt
+    ↓
+LLM
+    ↓
+Output
+
+
+DYNAMIC
+
+User / Application Data
+          ↓
+    Prompt Template
+          ↓
+     Dynamic Prompt
+          ↓
+          LLM
+          ↓
+        Output
+```
+
+---
+
+# Prompt Templates
+
+A **Prompt Template** is a structured way to create prompts dynamically by inserting variables into a predefined template.
+
+Instead of hardcoding the complete prompt every time, we define **placeholders** that can be filled at runtime.
+
+### Without a Prompt Template
+
+We may write:
+
+```python
+prompt = "Explain Python in English."
+```
+
+If we want to change the topic or language, we would need to construct another string.
+
+---
+
+### With a Prompt Template
+
+We can define:
+
+```text
+Explain {topic} in {language}.
+```
+
+Here:
+
+```text
+{topic}
+{language}
+```
+
+are placeholders.
+
+At runtime, they can be replaced with different values.
+
+For example:
+
+```text
+topic = Python
+language = English
+```
+
+produces:
+
+```text
+Explain Python in English.
+```
+
+Another request could use:
+
+```text
+topic = Artificial Intelligence
+language = Hindi
+```
+
+and produce:
+
+```text
+Explain Artificial Intelligence in Hindi.
+```
+
+---
+
+# Why Prompt Templates?
+
+Prompt templates make prompts:
+
+* Reusable
+* Flexible
+* Easier to manage
+* Easier to maintain
+* Suitable for dynamic user input
+* Useful for automated workflows
+
+### General Flow
+
+```text
+Predefined Template
+        ↓
+   {variables}
+        ↓
+Runtime Values
+        ↓
+  Final Prompt
+        ↓
+       LLM
+        ↓
+     Response
+```
+
+---
+
+# Prompt Template vs f-string
+
+Python `f-strings` can also be used to dynamically construct prompts.
+
+For example:
+
+```python
+topic = "Python"
+language = "English"
+
+prompt = f"Explain {topic} in {language}."
+```
+
+This works, but frameworks such as LangChain provide dedicated prompt-template components.
+
+### Advantages of Prompt Templates
+
+A prompt template provides functionality beyond simply constructing a Python string.
+
+It can provide:
+
+* Template validation
+* Reusability
+* Structured prompt construction
+* Integration with the LangChain ecosystem
+* Easier composition with other LangChain components
+
+For example, LangChain can validate whether the variables expected by the template are correctly supplied.
+
+This makes prompt templates especially useful when building larger LLM workflows.
+
+---
+
+# Messages in LangChain
+
+When working with **Chat Models**, LangChain represents conversations using different message types.
+
+The three important message types are:
+
+1. **System Message**
+2. **Human Message**
+3. **AI Message**
+
+---
+
+# 1. System Message
+
+A **System Message** provides instructions or behavior that guide the AI model.
+
+For example:
+
+```text
+You are a Python expert.
+```
+
+The system message establishes the role or behavior of the assistant.
+
+Example:
+
+```python
+SystemMessage(
+    content="You are a {domain} expert."
+)
+```
+
+Here `{domain}` can be dynamically provided.
+
+For example:
+
+```text
+domain = Python
+```
+
+can produce:
+
+```text
+You are a Python expert.
+```
+
+---
+
+# 2. Human Message
+
+A **Human Message** represents the message or instruction provided by the user.
+
+For example:
+
+```text
+Explain Python decorators.
+```
+
+Conceptually:
+
+```text
+Human Message
+      ↓
+"Explain Python decorators."
+```
+
+---
+
+# 3. AI Message
+
+An **AI Message** represents a response generated by the AI model.
+
+For example:
+
+```text
+A Python decorator is a function that...
+```
+
+Conceptually:
+
+```text
+AI Message
+     ↓
+Generated Response
+```
+
+---
+
+# Conversation Using Messages
+
+A multi-turn conversation can be represented as:
+
+```text
+System Message
+      ↓
+"You are a Python expert."
+
+Human Message
+      ↓
+"Explain decorators."
+
+AI Message
+      ↓
+"A decorator is..."
+
+Human Message
+      ↓
+"Give me an example."
+
+AI Message
+      ↓
+"Here is an example..."
+```
+
+This message-based structure allows the model to work with conversational context.
+
+---
+
+# Chat Prompt Template
+
+A **Chat Prompt Template** is used to create a structured list of messages dynamically.
+
+Instead of creating one large string, we define the different messages and their roles.
+
+For example:
+
+```text
+System:
+You are a {domain} expert.
+
+Human:
+Explain {topic}.
+```
+
+At runtime:
+
+```text
+domain = Python
+topic = decorators
+```
+
+the resulting messages become:
+
+```text
+System:
+You are a Python expert.
+
+Human:
+Explain decorators.
+```
+
+---
+
+# Chat Prompt Template Flow
+
+```text
+Chat Prompt Template
+        │
+        ├── System Message
+        │
+        ├── Human Message
+        │
+        ├── AI Message
+        │
+        └── Message Placeholder
+                 ↓
+          Runtime Values
+                 ↓
+          Final Message List
+                 ↓
+              Chat Model
+                 ↓
+             AI Response
+```
+
+---
+
+# Model Input
+
+A model can generally be invoked using either:
+
+1. A **single message/input**
+2. A **list of messages**
+
+The exact interface depends on the LangChain model abstraction being used.
+
+---
+
+## Single Input
+
+For a simple request, we can provide a single input.
+
+Conceptually:
+
+```text
+Single Input
+     ↓
+   Model
+     ↓
+ Response
+```
+
+For example:
+
+```text
+"Explain Python decorators."
+```
+
+This is useful when we simply want to send a request and receive a response.
+
+---
+
+# List of Messages
+
+For a conversational interaction, we can provide a list of messages.
+
+For example:
+
+```text
+[
+    System Message,
+    Human Message,
+    AI Message,
+    Human Message
+]
+```
+
+The model receives the sequence of messages and can use the conversation history as context.
+
+### Example
+
+```text
+System:
+You are a Python expert.
+
+Human:
+What is Python?
+
+AI:
+Python is a programming language...
+
+Human:
+What are decorators?
+```
+
+The list of messages represents the conversation context.
+
+---
+
+# Static Messages vs Dynamic Messages
+
+When working with chat models, messages can be created directly or generated dynamically.
+
+### Static Messages
+
+Messages can be explicitly defined:
+
+```text
+System → You are a Python expert.
+Human  → Explain decorators.
+AI     → A decorator is...
+```
+
+These messages are fixed when we create them.
+
+---
+
+### Dynamic Messages
+
+Messages can be generated using a **Chat Prompt Template**.
+
+For example:
+
+```text
+System:
+You are a {domain} expert.
+
+Human:
+Explain {topic}.
+```
+
+The values can be supplied at runtime.
+
+```text
+domain = Python
+topic = decorators
+```
+
+Result:
+
+```text
+System:
+You are a Python expert.
+
+Human:
+Explain decorators.
+```
+
+---
+
+# Message Placeholder
+
+A **Message Placeholder** is used inside a Chat Prompt Template to dynamically insert a list of messages at runtime.
+
+This is especially useful when working with **chat history** or other dynamically generated messages.
+
+For example:
+
+```text
+Chat Prompt Template
+
+System Message
+      ↓
+"You are a helpful assistant."
+
+Message Placeholder
+      ↓
+{chat_history}
+
+Human Message
+      ↓
+{user_input}
+```
+
+At runtime, `{chat_history}` can be replaced with the actual conversation history.
+
+---
+
+# Message Placeholder Flow
+
+```text
+Chat Prompt Template
+        │
+        ├── System Message
+        │
+        │   "You are a helpful assistant."
+        │
+        ├── Message Placeholder
+        │
+        │   {chat_history}
+        │
+        └── Human Message
+            {user_input}
+
+                ↓
+
+        Runtime Values
+                ↓
+        Actual Message List
+                ↓
+           Chat Model
+                ↓
+             Response
+```
+
+This becomes particularly useful when building **multi-turn conversational applications**.
+
+---
+
+# Complete Prompting Architecture
+
+The concepts learned so far can be connected together:
+
+```text
+User Input
+    ↓
+Application
+    ↓
+Prompt Template
+    ↓
+Insert Runtime Variables
+    ↓
+Create Messages
+    │
+    ├── System Message
+    ├── Human Message
+    ├── AI Message
+    └── Message Placeholder
+    ↓
+Chat Model
+    ↓
+LLM
+    ↓
+AI Response
+```
+
+---
+
+# Key Concepts Learned
+
+| Concept              | Purpose                                                |
+| -------------------- | ------------------------------------------------------ |
+| Prompt               | Input/instruction given to an LLM                      |
+| Text Prompt          | Prompt containing text-based input                     |
+| Multimodal Prompt    | Prompt containing multiple types of input              |
+| Static Prompt        | Predefined prompt controlled by the application        |
+| Dynamic Prompt       | Prompt generated or modified using runtime input       |
+| Prompt Template      | Reusable structure containing dynamic variables        |
+| System Message       | Defines instructions/behavior for the AI               |
+| Human Message        | Represents user input                                  |
+| AI Message           | Represents model-generated output                      |
+| Chat Prompt Template | Dynamically creates a structured list of chat messages |
+| Message Placeholder  | Dynamically inserts messages such as chat history      |
+| Chat Model           | Model interface designed to work with messages         |
+
+---
+
+# Overall Prompt Engineering Flow
+
+```text
+                    PROMPT
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+          Static              Dynamic
+             │                   │
+       Fixed Prompt        Prompt Template
+                                 │
+                                 ↓
+                         Runtime Variables
+                                 │
+                                 ↓
+                         Chat Prompt Template
+                                 │
+                  ┌──────────────┼──────────────┐
+                  ↓              ↓              ↓
+              System         Human/AI     Message Placeholder
+              Message         Messages       / Chat History
+                  └──────────────┼──────────────┘
+                                 ↓
+                             Chat Model
+                                 ↓
+                                LLM
+                                 ↓
+                              Output
+```
+
+---

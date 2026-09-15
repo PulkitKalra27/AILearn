@@ -752,3 +752,739 @@ The overall flow can be summarized as:
 | PUT       | Replace/update a resource                                 |
 | PATCH     | Partially update a resource                               |
 | DELETE    | Delete a resource                                         |
+
+---
+
+## 10/09/2026
+
+# Path Parameters
+
+**Path Parameters** are dynamic segments of a URL path used to identify a specific resource.
+
+They are commonly used when we want to:
+
+* Retrieve a specific resource
+* Update a specific resource
+* Delete a specific resource
+
+### Example
+
+```http
+GET /patients/101
+```
+
+Here, `101` is the **path parameter** used to identify a particular patient.
+
+In FastAPI:
+
+```python
+@app.get("/patients/{patient_id}")
+def get_patient(patient_id: int):
+    return {"patient_id": patient_id}
+```
+
+FastAPI extracts `patient_id` from the URL and validates it according to the declared type.
+
+---
+
+# `Path()`
+
+`Path()` is a FastAPI utility function used to provide **validation rules and metadata** for path parameters.
+
+It helps make path parameters more descriptive, validated, and properly documented.
+
+### Things `Path()` can provide
+
+**Metadata:**
+
+* `title`
+* `description`
+* `example` / `examples`
+
+**Validation:**
+
+* `gt` → greater than
+* `ge` → greater than or equal to
+* `lt` → less than
+* `le` → less than or equal to
+* `min_length`
+* `max_length`
+* `pattern`
+
+### Example
+
+```python
+from fastapi import Path
+
+@app.get("/patients/{patient_id}")
+def get_patient(
+    patient_id: int = Path(
+        title="Patient ID",
+        description="The unique ID of the patient",
+        gt=0
+    )
+):
+    return {"patient_id": patient_id}
+```
+
+Here:
+
+```python
+gt=0
+```
+
+means that the `patient_id` must be greater than `0`.
+
+---
+
+# HTTP Status Codes
+
+**HTTP Status Codes** are three-digit codes returned by a server to indicate the result of a client's HTTP request.
+
+They help the client, such as:
+
+* Browser
+* Frontend application
+* Mobile application
+* Another API
+
+understand whether the request was successful or whether something went wrong.
+
+### Main Categories
+
+| Status Code | Category     | Meaning                                   |
+| ----------- | ------------ | ----------------------------------------- |
+| `2xx`       | Success      | Request was successfully processed        |
+| `3xx`       | Redirection  | Further action or redirection is required |
+| `4xx`       | Client Error | Problem with the client's request         |
+| `5xx`       | Server Error | Problem occurred on the server            |
+
+### Common Status Codes
+
+```text
+200 → OK
+201 → Created
+400 → Bad Request
+401 → Unauthorized
+403 → Forbidden
+404 → Not Found
+500 → Internal Server Error
+```
+
+---
+
+# HTTP Exception
+
+**`HTTPException`** is a built-in FastAPI exception used to return a custom HTTP error response when something goes wrong.
+
+Instead of returning a normal successful JSON response, we can gracefully raise an HTTP error.
+
+### Example
+
+```python
+from fastapi import HTTPException
+
+if patient is None:
+    raise HTTPException(
+        status_code=404,
+        detail="Patient not found"
+    )
+```
+
+The API will return:
+
+```json
+{
+    "detail": "Patient not found"
+}
+```
+
+This allows the API to clearly communicate what went wrong to the client.
+
+---
+
+# Query Parameters
+
+**Query Parameters** are optional key-value pairs appended to the end of a URL to provide additional information to the server.
+
+They are commonly used for:
+
+* Filtering
+* Sorting
+* Searching
+* Pagination
+
+### Example
+
+```http
+GET /patients?city=Delhi
+```
+
+Here:
+
+```text
+city = Delhi
+```
+
+is a query parameter.
+
+Multiple query parameters are separated using `&`.
+
+```http
+GET /patients?city=Delhi&age=30
+```
+
+Here we have:
+
+```text
+city = Delhi
+age = 30
+```
+
+Query parameters allow us to perform additional operations **without changing the endpoint path itself**.
+
+For example:
+
+```text
+/patients
+```
+
+can remain the same while query parameters control how the data should be retrieved.
+
+---
+
+# `Query()`
+
+`Query()` is a FastAPI utility function used to declare, validate, and document query parameters in an API endpoint.
+
+It allows us to define:
+
+* Default values
+* Validation rules
+* Titles
+* Descriptions
+* Examples
+* Length constraints
+
+### Example
+
+```python
+from fastapi import Query
+
+@app.get("/patients")
+def get_patients(
+    limit: int = Query(
+        default=10,
+        gt=0,
+        le=100,
+        description="Number of patients to return"
+    )
+):
+    return {"limit": limit}
+```
+
+Now we can call:
+
+```http
+GET /patients?limit=20
+```
+
+FastAPI will automatically validate the value.
+
+For example:
+
+```http
+GET /patients?limit=-5
+```
+
+will fail validation because:
+
+```python
+gt=0
+```
+
+requires the value to be greater than `0`.
+
+---
+
+# 11/09/2026
+
+# Why Pydantic?
+
+Consider a simple function for inserting patient data:
+
+```python
+def insert_patient_data(name: str, age: int):
+
+    if type(name) == str and type(age) == int:
+
+        if age < 0:
+            raise TypeError("Age should be positive")
+
+        else:
+            print(name)
+            print(age)
+            print("Inserted into database")
+
+    else:
+        raise TypeError("Incorrect data type")
+```
+
+If we pass:
+
+```python
+insert_patient_data("Nitish", "30")
+```
+
+the value `"30"` is a string instead of an integer.
+
+We could manually validate this, but this approach does not scale well.
+
+As an application grows, we may need to validate many different things:
+
+* Data types
+* Required fields
+* Optional fields
+* String lengths
+* Numeric ranges
+* Email formats
+* Custom validation rules
+* Nested objects
+
+Writing manual validation logic for each function would make the code repetitive and difficult to maintain.
+
+This is one of the problems Pydantic helps solve.
+
+---
+
+# Pydantic Validation
+
+Pydantic allows us to define the expected structure of our data using a model.
+
+The model defines:
+
+* Expected fields
+* Expected data types
+* Validation constraints
+
+### Example
+
+```python
+from pydantic import BaseModel
+
+class Patient(BaseModel):
+    name: str
+    age: int
+```
+
+Now Pydantic knows that:
+
+```text
+name → string
+age  → integer
+```
+
+If the input does not match the expected structure or validation rules, Pydantic raises a validation error.
+
+---
+
+# How Pydantic Works
+
+The process can be understood in three steps.
+
+## Step 1 — Define the Pydantic Model
+
+Define the expected fields, their types, and validation constraints.
+
+```python
+class Patient(BaseModel):
+    name: str
+    age: int
+```
+
+---
+
+## Step 2 — Create the Object with Raw Input
+
+We provide the raw input to the Pydantic model.
+
+```python
+patient = Patient(
+    name="Nitish",
+    age=30
+)
+```
+
+Pydantic validates the data while creating the model object.
+
+If the data is invalid, a validation error is raised.
+
+---
+
+## Step 3 — Pass the Validated Model to the Function
+
+Once the data has been validated, we can pass the model object to our application logic.
+
+```python
+def insert_patient_data(patient: Patient):
+    print(patient.name)
+    print(patient.age)
+```
+
+The function now works with structured and validated data instead of repeatedly performing manual validation.
+
+---
+
+# Pydantic Validation Flow
+
+```text
+Raw Input
+    ↓
+Pydantic Model
+    ↓
+Validation
+    ↓
+Valid Data
+    ↓
+Application / Business Logic
+    ↓
+Database
+```
+
+If validation fails:
+
+```text
+Raw Input
+    ↓
+Pydantic Model
+    ↓
+Validation
+    ↓
+Invalid Data
+    ↓
+Validation Error
+```
+
+This helps keep **validation logic separate from application logic**.
+
+---
+
+# 14/09/2026
+
+# POST Endpoint
+
+A **POST endpoint** is commonly used to create a new resource.
+
+For example, when creating a new patient, the client sends patient information to the server in **JSON format**.
+
+This JSON data is sent inside the **request body**.
+
+A request body is the portion of an HTTP request that contains data sent by the client to the server.
+
+It is commonly used with HTTP methods such as:
+
+* `POST`
+* `PUT`
+* `PATCH`
+
+### Example
+
+```http
+POST /patients
+```
+
+Request body:
+
+```json
+{
+    "name": "Nitish",
+    "age": 30,
+    "city": "Delhi"
+}
+```
+
+---
+
+# POST Endpoint Flow
+
+The overall flow can be understood as:
+
+```text
+Client
+   ↓
+POST Request
+   ↓
+Request Body
+   ↓
+FastAPI
+   ↓
+Pydantic Model
+   ↓
+Validation
+   ↓
+Validated Data
+   ↓
+Application Logic
+   ↓
+Database
+   ↓
+Response
+```
+
+The important idea is that the data should be validated before it is used by the application or inserted into the database.
+
+---
+
+# Update Endpoint
+
+An **Update Endpoint** is used to modify an existing resource.
+
+The resource is generally identified using a **Path Parameter**.
+
+For example:
+
+```http
+PUT /patients/101
+```
+
+Here:
+
+```text
+101
+```
+
+is the patient ID that identifies the resource we want to update.
+
+The fields that need to be updated are sent in the **request body**.
+
+### Example
+
+```json
+{
+    "name": "Nitish Kumar",
+    "age": 31,
+    "city": "Delhi"
+}
+```
+
+---
+
+# Why Do We Need a Separate Pydantic Model for Update?
+
+Suppose our POST model is:
+
+```python
+class Patient(BaseModel):
+    name: str
+    age: int
+    city: str
+```
+
+Here, all fields are required.
+
+This makes sense when creating a new patient because we need the required patient information.
+
+However, when updating a patient, we may want to change only one field.
+
+For example:
+
+```json
+{
+    "age": 31
+}
+```
+
+If we use the same model, `name` and `city` would also be required.
+
+Therefore, we create a separate Pydantic model for updating the patient where the fields can be optional.
+
+### Example
+
+```python
+class PatientUpdate(BaseModel):
+    name: str | None = None
+    age: int | None = None
+    city: str | None = None
+```
+
+Now the client can provide only the fields that need to be changed.
+
+For example:
+
+```json
+{
+    "age": 31
+}
+```
+
+---
+
+# Update Endpoint Flow
+
+```text
+Client
+   ↓
+PUT /patients/{id}
+   ↓
+Path Parameter
+   ↓
+Identify Patient
+   ↓
+Request Body
+   ↓
+Pydantic Update Model
+   ↓
+Validation
+   ↓
+Update Database
+   ↓
+Response
+```
+
+The **Path Parameter** identifies *which resource* should be updated, while the **Request Body** contains *what data should be updated*.
+
+---
+
+# Delete Endpoint
+
+A **DELETE endpoint** is used to delete an existing resource.
+
+The resource is generally identified using a path parameter.
+
+### Example
+
+```http
+DELETE /patients/101
+```
+
+Here:
+
+```text
+101
+```
+
+identifies the patient that should be deleted.
+
+---
+
+# Delete Endpoint Flow
+
+```text
+Client
+   ↓
+DELETE /patients/{id}
+   ↓
+Path Parameter
+   ↓
+Find Patient
+   ↓
+Patient Found?
+   ├── No  → HTTP 404 Exception
+   │
+   └── Yes
+        ↓
+     Delete Patient
+        ↓
+      Response
+```
+
+If the requested patient does not exist, the API can raise an `HTTPException` with a `404 Not Found` status code.
+
+---
+
+# CRUD Implementation Summary
+
+The concepts learned can now be connected with the CRUD operations of the Patient Management API.
+
+| Operation | HTTP Method | Input                         | Purpose                    |
+| --------- | ----------- | ----------------------------- | -------------------------- |
+| Create    | `POST`      | Request Body                  | Create a new patient       |
+| Read      | `GET`       | Path / Query Parameters       | Retrieve patient data      |
+| Update    | `PUT`       | Path Parameter + Request Body | Update an existing patient |
+| Delete    | `DELETE`    | Path Parameter                | Delete an existing patient |
+
+---
+
+# Complete Request Flow
+
+```text
+                         CLIENT
+                            │
+                            │ HTTP Request
+                            ↓
+                         FastAPI
+                            │
+             ┌──────────────┼──────────────┐
+             │              │              │
+             ↓              ↓              ↓
+        Path Params    Query Params    Request Body
+             │              │              │
+             │              │              ↓
+             │              │         Pydantic
+             │              │              │
+             │              │              ↓
+             │              │         Validation
+             │              │              │
+             └──────────────┼──────────────┘
+                            ↓
+                     Application Logic
+                            │
+                            ↓
+                         Database
+                            │
+                            ↓
+                         Response
+                            │
+                            ↓
+                          Client
+```
+
+---
+
+# Key Concepts Learned
+
+| Concept         | Purpose                                         |
+| --------------- | ----------------------------------------------- |
+| Path Parameter  | Identifies a specific resource through the URL  |
+| `Path()`        | Validates and documents path parameters         |
+| Query Parameter | Provides additional information through the URL |
+| `Query()`       | Validates and documents query parameters        |
+| Request Body    | Carries structured data from client to server   |
+| Pydantic        | Validates and parses structured data            |
+| `HTTPException` | Returns meaningful HTTP errors                  |
+| POST            | Creates a resource                              |
+| PUT             | Updates/replaces a resource                     |
+| DELETE          | Deletes a resource                              |
+| CRUD            | Create, Read, Update, Delete                    |
+
+---
+
+# Overall Learning Flow
+
+```text
+API Fundamentals
+      ↓
+FastAPI
+      ↓
+HTTP Request / Response
+      ↓
+Path Parameters
+      ↓
+Query Parameters
+      ↓
+HTTP Status Codes
+      ↓
+HTTPException
+      ↓
+Pydantic
+      ↓
+Request Body
+      ↓
+POST
+      ↓
+PUT
+      ↓
+DELETE
+      ↓
+CRUD API
+```
