@@ -191,21 +191,21 @@
 # print(prompt)
 
 #Message Placeholder 
-from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
+# from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 
-chat_template = ChatPromptTemplate([
-    ('system','You are a helpful customer support agent'),
-    MessagesPlaceholder(variable_name='chat_history'),
-    ('human','{query}') 
-])
-chat_history=[]
-with open('chat_history.txt') as h:
-    chat_history.extend(h.readlines())
-print(chat_history)
+# chat_template = ChatPromptTemplate([
+#     ('system','You are a helpful customer support agent'),
+#     MessagesPlaceholder(variable_name='chat_history'),
+#     ('human','{query}') 
+# ])
+# chat_history=[]
+# with open('chat_history.txt') as h:
+#     chat_history.extend(h.readlines())
+# print(chat_history)
 
-prompt = chat_template.invoke({'chat_history': chat_history, 'query': 'Where is my refund'})
+# prompt = chat_template.invoke({'chat_history': chat_history, 'query': 'Where is my refund'})
 
-print(prompt)
+# print(prompt)
 
 # Structured Output 
 # using typeddict
@@ -217,6 +217,27 @@ print(prompt)
 # new_person: Person = {'name':'Pulkit', 'age':23}
 
 # print(new_person)
+
+
+# from typing import TypedDict
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# class Review(TypedDict):
+#     summary : str
+#     sentiment: str
+# structured_model = model.with_structured_output(Review)
+
+# result = structured_model. invoke("""The hardware is great, but the software feels bloated. There are
+# too many pre-installed apps that I can't remove. Also, the UI looks outdated compared to
+# other brands. Hoping for a software update to fix this.""")
+
+# print(result)
+# print(result['summary'])
+# print(type(result))
 
 #with structured output typeddict
 # from langchain_openrouter import ChatOpenRouter
@@ -278,5 +299,476 @@ print(prompt)
 # new_student = {'name':'Pulkit'} # the type is restricted we cannot write 32 in this where as in typeddict this does not throw the error
 
 # student = Student(**new_student) # unpacks this as it is dictionary 
-
+# print(type(student))
 # print(student)
+
+# default value 
+# from pydantic import BaseModel,EmailStr,Field
+# from typing import Optional #optional field 
+# class Student(BaseModel):
+#     name: str = 'pulkit'
+#     age:Optional[int]=None # if no value is given then it should be none
+#     email:EmailStr  # built in data validation
+#     cgpa:float = Field(gt=0,lt=10, default=5) # with field we can set constraints,default value, example and description
+
+# new_student = {'age':'23','email':'pulkit@gmail.com'} #type conversion on age field that it coerce or type coercing 
+
+# student = Student( ** new_student)
+# student_dict = dict(student) #converted into dict to access only age 
+# print(student_dict['age'])
+# student_json = student.model_dump_json() # to covert to json    
+
+# use of pydantic in mobile review
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from typing import TypedDict,Annotated,Optional,Literal
+# from pydantic import BaseModel,Field
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+                
+# # schema
+# class Review(BaseModel):
+#     key_themes:list[str] = Field(description ="Write down all the key themes discusses in the review in a list")
+#     summary :str= Field(description="A brief summary of the review")
+#     sentiment : Literal['Positive','Negative'] = Field(description ="Return sentiment of the review either negative, positive or neutral")
+#     pros:Optional[list[str]]= Field(default = None, description ="Write down all the pros in the list ")
+#     cons:Optional[list[str]]= Field(default = None, description ="Write down all the cons in the list ")
+#     name:Optional[str]= Field(default = None, description ="Write the Name of the reviewer")
+
+# structured_model = model.with_structured_output(Review)
+
+# result = structured_model. invoke("""I recently upgraded to the Samsung Galaxy S24 Ultra, and I must say, it's an absolute powerhouse! The Snapdragon 8 Gen 3
+# processor makes everything lightning fast-whether I'm gaming, multitasking, or editing photos. The 5000mAh battery easily
+# lasts a full day even with heavy use, and the 45W fast charging is a lifesaver.
+
+# The S-Pen integration is a great touch for note-taking and quick sketches, though I don't use it often. What really blew me
+# away is the 200MP camera-the night mode is stunning, capturing crisp, vibrant images even in low light. Zooming up to 100x
+# actually works well for distant objects, but anything beyond 30x loses quality.
+
+# However, the weight and size make it a bit uncomfortable for one-handed use. Also, Samsung's One UI still comes with
+# bloatware-why do I need five different Samsung apps for things Google already provides? The $1,300 price tag is also a hard
+# pill to swallow.
+
+# Pros:
+# Insanely powerful processor (great for gaming and productivity)
+# Stunning 200MP camera with incredible zoom capabilities
+# Long battery life with fast charging
+# S-Pen support is unique and useful
+
+# Cons:
+# Bulky and heavy-not great for one-handed use
+# Bloatware still exists in One UI
+# Expensive compared to competitors
+
+# Review done By Pulkit Kalra
+# """)
+
+# # print(result)
+# print(result.cons) # it is pydantic object so we can't extract like that 
+# # print(result['sentiment']) # it is pydantic object so we can't extract like that 
+
+
+# Json schema
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from typing import TypedDict,Annotated,Optional,Literal
+# from pydantic import BaseModel,Field
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+                
+# # json schema
+# json_schema = {
+#   "title": "Review",
+#   "type": "object",
+#   "properties": {
+#     "key_themes": {
+#       "type": "array",
+#       "items": {
+#         "type": "string"
+#       },
+#       "description": "Write down all the key themes discussed in the review in a list"
+#     },
+#     "summary": {
+#       "type": "string",
+#       "description": "A brief summary of the review"
+#     },
+#     "sentiment": {
+#       "type": "string",
+#       "enum": ["pos", "neg"], # literal is not used enum is used
+#       "description": "Return sentiment of the review either negative or positive"
+#     },
+#     "pros": {
+#       "type": ["array", "null"],
+#       "items": {
+#         "type": "string"
+#       },
+#       "description": "Write down all the pros inside a list"
+#     },
+#     "cons": {
+#       "type": ["array", "null"],
+#       "items": {
+#         "type": "string"
+#       },
+#       "description": "Write down all the cons inside a list"
+#     },
+#     "name": {
+#       "type": ["string", "null"],
+#       "description": "Write the name of the reviewer"
+#     }
+#   },
+#   "required": ["key_themes", "summary", "sentiment"]
+# }
+
+
+# structured_model = model.with_structured_output(json_schema)
+
+# result = structured_model. invoke("""I recently upgraded to the Samsung Galaxy S24 Ultra, and I must say, it's an absolute powerhouse! The Snapdragon 8 Gen 3
+# processor makes everything lightning fast-whether I'm gaming, multitasking, or editing photos. The 5000mAh battery easily
+# lasts a full day even with heavy use, and the 45W fast charging is a lifesaver.
+
+# The S-Pen integration is a great touch for note-taking and quick sketches, though I don't use it often. What really blew me
+# away is the 200MP camera-the night mode is stunning, capturing crisp, vibrant images even in low light. Zooming up to 100x
+# actually works well for distant objects, but anything beyond 30x loses quality.
+
+# However, the weight and size make it a bit uncomfortable for one-handed use. Also, Samsung's One UI still comes with
+# bloatware-why do I need five different Samsung apps for things Google already provides? The $1,300 price tag is also a hard
+# pill to swallow.
+
+# Pros:
+# Insanely powerful processor (great for gaming and productivity)
+# Stunning 200MP camera with incredible zoom capabilities
+# Long battery life with fast charging
+# S-Pen support is unique and useful
+
+# Cons:
+# Bulky and heavy-not great for one-handed use
+# Bloatware still exists in One UI
+# Expensive compared to competitors
+
+# Review done By Pulkit Kalra
+# """)
+
+# # print(result)
+# # print(result.cons) # it is pydantic object so we can't extract like that 
+# print(result['cons']) # it is dict so we extract like that 
+
+
+
+# Output Parsers without stroutputparser
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# template1 = PromptTemplate(
+#     template ='Write a detailed report on {topic}',
+#     input_variables=['topic']
+# )
+# template2 = PromptTemplate(
+#     template ='Write a 5 line summary on the following text. /n {text}',
+#     input_variables=['text']
+# )
+# prompt1 = template1.invoke({'topic':'black hole'})
+# result = model.invoke(prompt1)
+# prompt2 = template2.invoke({'text':result.content})
+# result1= model.invoke(prompt2)
+
+# print(result1.content)
+
+# with output parser
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# template1 = PromptTemplate(
+#     template ='Write a detailed report on {topic}',
+#     input_variables=['topic']
+# )
+# template2 = PromptTemplate(
+#     template ='Write a 5 line summary on the following text. /n {text}',
+#     input_variables=['text']
+# )
+
+# parser = StrOutputParser()
+# chain = template1 | model | parser | template2 | model | parser
+# result = chain.invoke({'topic':'Black hole'})
+# print(result)
+
+# with JSON ouput parser
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import JsonOutputParser
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# parser = JsonOutputParser()
+
+# template1 = PromptTemplate(
+#     template ='Give me the name, age and city of a fictional person \n {format_instruction}',
+#     input_variables=[],
+#     partial_variables={'format_instruction': parser.get_format_instructions()} # it fills before the runtime and gives the instruction that in which format we want given by parser 
+# )
+
+# chain = template1 | model | parser  # with chains 
+
+# output = chain.invoke({}) # as no input variables are there so we send a blank dict
+
+# # prompt = template1.format()
+
+# # result = model.invoke(prompt)
+
+# # output = parser.parse(result.content)
+# print(output['name'])
+# print(type(output))
+
+
+# StructuredOutput Parser now outdated 
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StructuredOutputParser,ResponseSchema
+
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# schema = [
+#     ResponseSchema(name='fact_1', description='Fact 1 about the topic'),
+#     ResponseSchema(name='fact_2', description='Fact 2 about the topic'),
+#     ResponseSchema(name='fact_3', description='Fact 3 about the topic'),
+# ]
+# parser = StructuredOutputParser. from_response_schemas (schema)
+
+# template = PromptTemplate(
+# template='Give 3 fact about {topic} \n {format_instruction} ',
+# input_variables=['topic'],
+# partial_variables={'format_instruction':parser.get_format_instructions()}
+# )
+# chain = template | model | parser
+
+# result = chain.invoke({'topic':'black hole'})
+
+# print(result)
+
+#Pydantic output parser 
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from pydantic import BaseModel,Field
+# from langchain_core.output_parsers import PydanticOutputParser
+# from langchain_core.prompts import PromptTemplate
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# class Person(BaseModel):
+#     name: str = Field(description='Name of the person')
+#     age: int = Field(gt=18,description='Age of the person')
+#     city: str = Field(description='Name of the city the person belongs to')
+
+# parser = PydanticOutputParser(pydantic_object=Person)
+# template = PromptTemplate(
+#     template ='Generate the name,age and city of a fictional {place} person \n {format_instruction}',
+#     input_variables=['place'],
+#     partial_variables={'format_instruction':parser.get_format_instructions()}
+# )
+
+# chain = template | model | parser
+
+# output = chain.invoke({'place':'Russian'})
+
+# print(output)
+
+
+# Chains
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# prompt = PromptTemplate(
+#     template = 'Generate 5 interesting fact about {topic}',
+#     input_variables=['topic']
+# )
+# parser = StrOutputParser()
+# chain = prompt|model|parser
+
+# result = chain.invoke({'topic':'cricket'})
+# print(result)
+
+# chain.get_graph().print_ascii()
+
+#Sequential Chain 
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# template1 = PromptTemplate(
+#     template ='Write a detailed report on {topic}',
+#     input_variables=['topic']
+# )
+# template2 = PromptTemplate(
+#     template ='Write a 5 line summary on the following text. /n {text}',
+#     input_variables=['text']
+# )
+
+# parser = StrOutputParser()
+# chain = template1 | model | parser | template2 | model | parser
+# result = chain.invoke({'topic':'Unemployement in India'})
+# print(result)
+# chain.get_graph().print_ascii()
+
+# Parallel chain
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnableParallel  # parallely we can excute multiple chains
+
+# load_dotenv()
+# model1 = ChatOpenRouter(model="openrouter/free")
+# model2 = ChatOpenRouter(model="openrouter/free")
+
+# prompt1 = PromptTemplate(
+#     template='Generate short and simple notes from the following text \n {text}',
+#     input_variables=['text']
+# )
+
+# prompt2 = PromptTemplate(
+#     template='Generate 5 short question and answer from the following text \n {text}',
+#     input_variables=['text']
+# )
+
+# prompt3 = PromptTemplate(
+#     template='Merge the provided notes and quiz into a single document \n notes -> {notes} and quiz ->{quiz}',
+#     input_variables=['notes', 'quiz']
+# )
+# parser = StrOutputParser()
+
+# parallel_chain = RunnableParallel({
+#     'notes': prompt1 | model1 | parser,
+#     'quiz':prompt2 | model2 | parser
+# })
+
+# merge_chain = prompt3 | model1 | parser
+
+# chain = parallel_chain | merge_chain
+
+# text = """Support vector machines (SVMs) are a set of supervised learning methods used for classification,
+# regression and outliers detection.
+
+# The advantages of support vector machines are:
+
+# · Effective in high dimensional spaces.
+# . Still effective in cases where number of dimensions is greater than the number of samples.
+# . Uses a subset of training points in the decision function (called support vectors), so it is also memory
+# efficient.
+
+# . Versatile: different Kernel functions can be specified for the decision function. Common kernels are
+# provided, but it is also possible to specify custom kernels.
+
+# The disadvantages of support vector machines include:
+
+# . If the number of features is much greater then the number of samples, avoid over-fitting in choosing
+# Kernel functions and regularization term is crucial.
+# . SVMs do not directly provide probability estimates, these are calculated using an ekpensive five-fold
+# cross-validation (see Scores and probabilities, below).
+
+# The support vector machines in scikit-learn support both dense ( numpy.ndarray and convertible to that by
+# numpy.asarray ) and sparse (any scipy.sparse) sample vectors as input. However, to use an SVM to make
+# predictions for sparse data, it must have been fit on such data. For optimal performance, use C-ordered
+# numpy.ndarray (dense) or scipy.sparse.csr_matrix (sparse) with dtype=float64"""
+
+# result = chain.invoke({'text':text})
+# # print(result)
+# chain.get_graph().print_ascii()
+
+#conditional chain
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser,PydanticOutputParser
+# from langchain_core.runnables import RunnableBranch,RunnableLambda  # if and else in chains and lamda makes any lambda function into runnable so we can make it in a chain
+# from pydantic import BaseModel,Field
+# from typing import Literal
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+# parser1 = StrOutputParser()
+
+# class feedback(BaseModel):
+#     sentiment:Literal['positive','negative'] = Field(description='Give the sentiment of the feedback')
+# parser2 = PydanticOutputParser(pydantic_object=feedback)
+
+# prompt1 = PromptTemplate(
+#     template='Classify the sentiment of the following feedback text into positive or negative \n {feedback} \n {format_instruction}',
+#     input_variables=['feedback'],
+#     partial_variables={'format_instruction':parser2.get_format_instructions()}
+# )   
+# classifier_chain = prompt1 | model | parser2
+
+# prompt2 = PromptTemplate(
+#     template='Write an appropriate response to this positive feedback\n {feedback}',
+#     input_variables=['feedback']
+# )   
+# prompt3 = PromptTemplate(
+#     template='Write an appropriate response to this negative feedback\n {feedback}',
+#     input_variables=['feedback']
+# )  
+
+# chain_branch = RunnableBranch(
+#     (lambda x:x.sentiment == 'positive', prompt2 | model | parser1),
+#     (lambda x:x.sentiment == 'negative', prompt3 | model | parser1),
+#     RunnableLambda(lambda x:"could not find sentiment")
+# )
+# chain = classifier_chain | chain_branch
+
+# result = chain.invoke({'feedback':'This is a wonderful smartphone'})
+# chain.get_graph().print_ascii()
+
+
+# Runnables 
+
+from langchain_openrouter import ChatOpenRouter
+from dotenv import load_dotenv
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableSequence 
+
+load_dotenv()
+model = ChatOpenRouter(model="openrouter/free")
+
+prompt1 = PromptTemplate(
+    template = 'Write a joke about {topic}',
+    input_variables=['topic']
+)
+prompt2 = PromptTemplate(
+    template = 'Explain the following joke {text}',
+    input_variables=['text']
+)
+parser = StrOutputParser()
+
+chain = RunnableSequence(prompt1,model,parser,prompt2,model,parser)
+
+print(chain.invoke({'topic':'AI'}))

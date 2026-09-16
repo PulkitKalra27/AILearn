@@ -116,6 +116,7 @@ def delete_patient(patient_id: str):
 
 
 # Pydantic 
+# without pydantic code 
 # def insert_patient_data(name: str, age: int):
 #     if type(name) == str and type(age) == int:
 #         if age < 0:
