@@ -1488,3 +1488,819 @@ DELETE
       ↓
 CRUD API
 ```
+
+# 15/09/2026
+
+## Building an ML Model API with FastAPI
+
+Started learning how a **Machine Learning model can be exposed through an API using FastAPI**.
+
+The overall idea was:
+
+```text
+Dummy Dataset
+      ↓
+Train ML Model
+      ↓
+Save Model as model.pkl
+      ↓
+FastAPI
+      ↓
+/predict Endpoint
+      ↓
+Client Sends Data
+      ↓
+Data Transformation
+      ↓
+ML Model Inference
+      ↓
+Prediction Response
+```
+
+### Step 1 — Build the ML Model
+
+First, a Machine Learning model is trained using a **dummy dataset**.
+
+The trained model is then saved as:
+
+```text
+model.pkl
+```
+
+The purpose of this is to later load the trained model inside the FastAPI application and use it for prediction.
+
+### Step 2 — Create FastAPI Endpoint
+
+The next step is to expose the ML model through a FastAPI API.
+
+The HTTP method used for prediction is:
+
+```text
+POST
+```
+
+The reason for using `POST` is that the client needs to **send data to the server**.
+
+The server then processes that data and performs ML model inference.
+
+### `/predict` Endpoint
+
+The main endpoint is:
+
+```text
+POST /predict
+```
+
+The client sends the original input data to this endpoint.
+
+The API then:
+
+1. Receives the input data.
+2. Validates the data.
+3. Transforms the data into the format used while training the model.
+4. Sends the transformed data to the ML model.
+5. Performs model inference.
+6. Returns the prediction.
+
+The important concept learned here is that the API acts as the bridge between the **client/frontend and the Machine Learning model**.
+
+---
+
+# 16/09/2026
+
+## Improving the FastAPI ML Application
+
+The FastAPI ML application was improved by making the project more structured, maintainable, and production-oriented.
+
+### Improvements Made
+
+1. **Created a new folder structure**
+
+   The project was organized into separate folders so that different responsibilities could be separated.
+
+2. **Field Validator for City Feature**
+
+   Added validation for the `city` feature using Pydantic field validation.
+
+   This ensures that the incoming city value is validated before it reaches the ML logic.
+
+3. **Added Routes**
+
+   Added multiple API routes:
+
+   ### Home
+
+   Used as the basic/home endpoint of the API.
+
+   ### Health Check
+
+   Used to check whether the API/application is running correctly.
+
+4. **Added Model Version**
+
+   Added a model version so that the API can identify which version of the Machine Learning model is being used.
+
+5. **Separation of Logic**
+
+   Different responsibilities were separated instead of keeping everything inside the API endpoint.
+
+   ```text
+   Pydantic Model
+        ↓
+   Input Validation
+        ↓
+   City Tier Logic
+        ↓
+   ML Logic
+        ↓
+   Prediction
+   ```
+
+   Main separation:
+
+   * **Pydantic Model** → Handles input/output data structure and validation.
+   * **City Tier** → Handles city-related transformation/business logic.
+   * **ML Logic** → Handles loading the model and performing prediction.
+
+6. **Try-Catch / Exception Handling**
+
+   Added error handling so that failures can be handled properly instead of allowing the application to crash or return an uncontrolled error.
+
+7. **Added Confidence Score**
+
+   The prediction response was improved to include a confidence score along with the prediction.
+
+   Example concept:
+
+   ```text
+   Prediction
+   Confidence Score
+   ```
+
+8. **Response Model**
+
+   Added a FastAPI response model.
+
+## Response Model
+
+In FastAPI, a **response model** defines the structure of the data that an API endpoint will return.
+
+It helps with:
+
+### 1. Clean API Documentation
+
+FastAPI can use the response model to generate structured API documentation in:
+
+```text
+/docs
+```
+
+### 2. Output Validation
+
+The response model validates the data returned by the API.
+
+This helps prevent the API from returning malformed output.
+
+### 3. Response Filtering
+
+It can filter unnecessary fields from the response so that only the required data is returned to the client.
+
+The overall API flow became:
+
+```text
+Client
+  ↓
+POST /predict
+  ↓
+Pydantic Input Model
+  ↓
+Validation
+  ↓
+Data Transformation
+  ↓
+ML Logic
+  ↓
+Prediction + Confidence Score
+  ↓
+Response Model
+  ↓
+JSON Response
+```
+
+---
+
+# 17/09/2026
+
+# Docker
+
+Started learning **Docker** and how it can be used to package and run applications consistently across different environments.
+
+## What is Docker?
+
+Docker is a platform that helps developers **build, share, and run containerized applications**.
+
+A simple analogy:
+
+> Like noodles and masala — if we put the required masala and ingredients into a standardized packet, we can take that packet somewhere else and prepare the same thing.
+
+Similarly, in software development, an application may work on the developer's machine but fail in testing because of differences in:
+
+* Dependencies
+* Configuration
+* Runtime
+* Environment
+* Infrastructure
+
+Docker packages the application and its required environment into a standardized unit that can be run elsewhere.
+
+---
+
+# Why Do We Need Docker?
+
+## 1. Consistency Across Environments
+
+### Problem
+
+Applications can behave differently in:
+
+```text
+Development
+     ↓
+Testing
+     ↓
+Production
+```
+
+because of differences in configurations, dependencies, and infrastructure.
+
+### Solution
+
+Docker containers encapsulate the required components of an application so that the application can run consistently across different environments.
+
+---
+
+## 2. Isolation
+
+Docker provides isolated environments for applications.
+
+### Problem
+
+Running multiple applications on the same host can result in:
+
+* Dependency conflicts
+* Application conflicts
+* Resource contention
+
+### Solution
+
+Docker provides isolated containers for applications, reducing interference between applications.
+
+### Docker vs Virtual Machine
+
+Docker provides application-level isolation through containers, whereas virtual machines generally virtualize an entire operating-system environment.
+
+---
+
+## 3. Scalability
+
+### Problem
+
+When application traffic increases, manually scaling applications can become difficult.
+
+### Solution
+
+Docker makes horizontal scaling easier by allowing multiple container instances of an application to be run.
+
+```text
+              ┌── Container 1
+              │
+Application ──┼── Container 2
+              │
+              └── Container 3
+```
+
+---
+
+# How Docker Works
+
+## Docker Engine
+
+The **Docker Engine** is the core component responsible for creating, running, and managing Docker containers.
+
+It provides the runtime and infrastructure required for Docker containerization.
+
+### Components of Docker Engine
+
+## 1. Docker Daemon — `dockerd`
+
+The Docker daemon is a background service running on the host machine.
+
+It manages Docker objects such as:
+
+* Images
+* Containers
+* Networks
+* Volumes
+
+It listens for Docker API requests and performs container lifecycle operations such as:
+
+```text
+Start
+Stop
+Restart
+Create
+Remove
+```
+
+---
+
+## 2. Docker CLI — `docker`
+
+The Docker Command Line Interface is the tool developers use to communicate with Docker.
+
+For example, Docker commands can be used to:
+
+```text
+Build images
+Run containers
+Manage images
+Manage containers
+Manage Docker resources
+```
+
+---
+
+## 3. Docker REST API
+
+The Docker REST API allows communication between Docker clients and the Docker daemon.
+
+It also allows applications and automation systems to interact programmatically with Docker.
+
+The simplified flow is:
+
+```text
+Developer
+    ↓
+Docker CLI
+    ↓
+Docker REST API
+    ↓
+Docker Daemon
+    ↓
+Docker Engine
+    ↓
+Containers / Images / Networks / Volumes
+```
+
+---
+
+# Docker Image
+
+A **Docker Image** is a lightweight, standalone, executable package containing the components required to run an application.
+
+It can contain:
+
+* Application code
+* Runtime
+* Libraries
+* Dependencies
+* Environment configuration
+* Other required files
+
+A Docker image is used as the basis for creating containers.
+
+### Simple Analogy
+
+```text
+Docker Image = Standardized Box / Package
+Docker Container = Running Instance of that Box
+```
+
+The image can be given to another developer/tester so that they can create and run a container from the same packaged application environment.
+
+---
+
+# Components of a Docker Image
+
+## 1. Base Image
+
+The starting point for building the Docker image.
+
+Examples include:
+
+```text
+alpine
+ubuntu
+python
+node
+```
+
+---
+
+## 2. Application Code
+
+The actual application code and files required by the application.
+
+---
+
+## 3. Dependencies
+
+Libraries, frameworks, and packages required to run the application.
+
+For a Python FastAPI application, this could include packages such as:
+
+```text
+FastAPI
+Uvicorn
+Scikit-learn
+Pydantic
+```
+
+---
+
+## 4. Metadata
+
+Information associated with the image, such as:
+
+* Environment variables
+* Labels
+* Exposed ports
+* Configuration information
+
+---
+
+# Docker Image Lifecycle
+
+## 1. Creation
+
+Images can be created using:
+
+```text
+docker build
+```
+
+The Dockerfile provides the instructions used during the build process.
+
+---
+
+## 2. Storage
+
+Docker images can be stored locally on the host machine.
+
+They can also be stored in Docker registries.
+
+---
+
+## 3. Distribution
+
+Images can be pushed to a registry and downloaded by other users or systems.
+
+```text
+Developer
+    ↓
+Build Image
+    ↓
+Docker Registry
+    ↓
+Download / Pull
+    ↓
+Tester / Server
+```
+
+---
+
+## 4. Execution
+
+A Docker image is used to create and run a container.
+
+```text
+Docker Image
+     ↓
+Docker Container
+     ↓
+Running Application
+```
+
+---
+
+# Dockerfile
+
+A **Dockerfile** is a text file containing instructions used to build a Docker image.
+
+Each instruction contributes a layer to the image.
+
+The Dockerfile makes image creation:
+
+* Automated
+* Consistent
+* Reproducible
+
+---
+
+# Key Dockerfile Instructions
+
+## 1. `FROM` — Base Image
+
+Specifies the starting image.
+
+Example:
+
+```dockerfile
+FROM ubuntu:20.04
+```
+
+For a Python application, a Python base image can also be used.
+
+---
+
+## 2. `LABEL` — Metadata
+
+Adds metadata to the image.
+
+Example:
+
+```dockerfile
+LABEL version="1.0"
+```
+
+---
+
+## 3. `RUN` — Execute Commands
+
+Executes commands while building the image.
+
+Example:
+
+```dockerfile
+RUN apt-get update
+```
+
+---
+
+## 4. `COPY` — Copy Files
+
+Copies files or directories from the host into the image.
+
+Example:
+
+```dockerfile
+COPY . /app
+```
+
+---
+
+## 5. `ENV` — Environment Variables
+
+Sets environment variables.
+
+Example:
+
+```dockerfile
+ENV PATH=/app/bin:$PATH
+```
+
+---
+
+## 6. `WORKDIR` — Working Directory
+
+Sets the working directory for subsequent instructions.
+
+Example:
+
+```dockerfile
+WORKDIR /app
+```
+
+---
+
+## 7. `EXPOSE` — Expose Port
+
+Indicates the port on which the containerized application listens.
+
+Example:
+
+```dockerfile
+EXPOSE 8080
+```
+
+---
+
+## 8. `CMD` — Default Command
+
+Specifies the default command executed when the container starts.
+
+Example:
+
+```dockerfile
+CMD ["python", "app.py"]
+```
+
+---
+
+## 9. `VOLUME` — Persistent/External Data
+
+Creates a mount point for externally mounted volumes.
+
+Example:
+
+```dockerfile
+VOLUME ["/data"]
+```
+
+---
+
+## 10. `ARG` — Build Arguments
+
+Defines variables that can be supplied during the image build process.
+
+Example:
+
+```dockerfile
+ARG VERSION=1.0
+```
+
+---
+
+# Docker Container
+
+A **Docker Container** is a lightweight, portable, and isolated environment created from a Docker image.
+
+The container contains the running application and uses the packaged dependencies and environment provided by the image.
+
+The relationship is:
+
+```text
+Dockerfile
+    ↓
+Docker Image
+    ↓
+Docker Container
+    ↓
+Running Application
+```
+
+An important distinction learned:
+
+```text
+Image      → Blueprint / Package
+Container  → Running Instance
+```
+
+---
+
+# Docker Registry
+
+A **Docker Registry** is a service that stores and distributes Docker images.
+
+It acts as a repository from which Docker images can be:
+
+```text
+Push → Store → Pull
+```
+
+The most well-known public registry is **Docker Hub**.
+
+---
+
+# Docker Registry Components
+
+## 1. Repository
+
+A repository contains related Docker images, usually representing the same application.
+
+---
+
+## 2. Tags
+
+Tags are used to identify different versions of images.
+
+Example:
+
+```text
+myapp:1.0
+myapp:2.0
+myapp:latest
+```
+
+This allows different versions of the same application image to be maintained.
+
+---
+
+# Types of Docker Registries
+
+## 1. Docker Hub
+
+A public Docker registry used to share and obtain Docker images.
+
+It provides public repositories and also supports private repositories.
+
+---
+
+## 2. Private Registries
+
+Organizations can create private registries to securely store and manage their own Docker images.
+
+They provide more control over access and image distribution.
+
+---
+
+## 3. Third-Party Registries
+
+Examples include:
+
+```text
+Amazon ECR
+Google Container Registry
+Azure Container Registry
+```
+
+These can integrate Docker image storage and distribution with cloud platforms.
+
+---
+
+# Benefits of Docker Registries
+
+## 1. Centralized Image Management
+
+Provides a central location for storing and managing Docker images.
+
+## 2. Version Control
+
+Image tags make it possible to maintain and identify different versions.
+
+```text
+myapp:1.0
+myapp:2.0
+```
+
+## 3. Collaboration
+
+Developers and teams can share images through registries.
+
+## 4. Security
+
+Private registries can restrict access to application images.
+
+## 5. CI/CD Integration
+
+Registries can be integrated into CI/CD pipelines to automate:
+
+```text
+Build
+  ↓
+Store
+  ↓
+Deploy
+```
+
+---
+
+# Learning Progress — 15/09/2026 to 17/09/2026
+
+| Date       | Topics Covered                                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 15/09/2026 | ML Model API, `model.pkl`, FastAPI, POST, `/predict`, ML inference                                                                                                 |
+| 16/09/2026 | FastAPI project structure, Pydantic validation, routes, health check, model versioning, separation of logic, exception handling, confidence score, response models |
+| 17/09/2026 | Docker, Docker Engine, Docker Daemon, Docker CLI, REST API, Docker Images, Dockerfile, Containers, Registries, Image Lifecycle                                     |
+
+## Key Concepts Learned
+
+```text
+Machine Learning Model
+        ↓
+      model.pkl
+        ↓
+     FastAPI
+        ↓
+    POST /predict
+        ↓
+Input Validation
+        ↓
+Data Transformation
+        ↓
+   ML Inference
+        ↓
+Prediction + Confidence
+        ↓
+ Response Model
+        ↓
+    JSON Response
+```
+
+Then the application deployment concept was extended with Docker:
+
+```text
+Application
+     ↓
+Dockerfile
+     ↓
+Docker Image
+     ↓
+Docker Registry
+     ↓
+Docker Container
+     ↓
+Running Application
+```
+
+This connected the learning from **Machine Learning → FastAPI → API design → application structure → Docker containerization and distribution**.

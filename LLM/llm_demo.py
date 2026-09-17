@@ -748,27 +748,150 @@
 # chain.get_graph().print_ascii()
 
 
-# Runnables 
+# RunnablesSequence
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnableSequence 
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# prompt1 = PromptTemplate(
+#     template = 'Write a joke about {topic}',
+#     input_variables=['topic']
+# )
+# prompt2 = PromptTemplate(
+#     template = 'Explain the following joke {text}',
+#     input_variables=['text']
+# )
+# parser = StrOutputParser()
+
+# chain = RunnableSequence(prompt1,model,parser,prompt2,model,parser)
+
+# print(chain.invoke({'topic':'AI'}))
+
+#Runnable Parallel
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnableSequence,RunnableParallel 
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# prompt1 = PromptTemplate(
+#     template='Generate a tweet about {topic}',
+#     input_variables=['topic']
+# )
+
+# prompt2 = PromptTemplate(
+#     template='Generate a linkedin {topic}',
+#     input_variables=['topic']
+# )
+
+# parser = StrOutputParser()
+
+# parallel_chain = RunnableParallel({
+#     'tweet': RunnableSequence(prompt1,model,parser),
+#     'linkedin':RunnableSequence(prompt2,model,parser)
+# })
+
+# result = parallel_chain.invoke({'topic':'AI'})
+# print(result)
+
+#RunnablePassThrough 
+
+# from langchain_openrouter import ChatOpenRouter
+# from dotenv import load_dotenv
+# from langchain_core.prompts import PromptTemplate
+# from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnableSequence,RunnableParallel,RunnablePassthrough
+
+# load_dotenv()
+# model = ChatOpenRouter(model="openrouter/free")
+
+# prompt1 = PromptTemplate(
+#     template = 'Write a joke about {topic}',
+#     input_variables=['topic']
+# )
+# prompt2 = PromptTemplate(
+#     template = 'Explain the following joke {text}',
+#     input_variables=['text']
+# )
+# parser = StrOutputParser()
+
+# joke_gen_chain = RunnableSequence(prompt1,model,parser)
+
+# parallel_chain =  RunnableParallel({
+#     'joke': RunnablePassthrough(),
+#     'explanation':RunnableSequence(prompt2,model,parser)
+# })
+
+# chain = RunnableSequence(joke_gen_chain,parallel_chain)
+# print(chain.invoke({'topic':'cricket'}))
+
+#RunnableLambda
 
 from langchain_openrouter import ChatOpenRouter
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableSequence 
+from langchain_core.runnables import RunnableSequence,RunnableParallel,RunnablePassthrough,RunnableLambda
+
+load_dotenv()
+model = ChatOpenRouter(model="openrouter/free")
+
+def word_count(text):
+    return len(text.split())
+
+prompt = PromptTemplate(
+    template = 'Write a joke about {topic}',
+    input_variables=['topic']
+)
+parser = StrOutputParser()
+
+joke_gen_chain = RunnableSequence(prompt,model,parser)
+
+parallel_chain =  RunnableParallel({
+    'joke': RunnablePassthrough(),
+    'word_count':RunnableLambda(word_count)
+})
+
+chain = RunnableSequence(joke_gen_chain,parallel_chain)
+result = chain.invoke({'topic':'AI'})
+
+final_result  = """{} \n word count {}""".format(result['joke'],result['word_count'])
+print(final_result)
+
+#Runnable Branch
+
+from langchain_openrouter import ChatOpenRouter
+from dotenv import load_dotenv
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableSequence,RunnableParallel,RunnablePassthrough,RunnableLambda,RunnableBranch
 
 load_dotenv()
 model = ChatOpenRouter(model="openrouter/free")
 
 prompt1 = PromptTemplate(
-    template = 'Write a joke about {topic}',
+    template = 'Write a Detailed report on {topic}',
     input_variables=['topic']
 )
 prompt2 = PromptTemplate(
-    template = 'Explain the following joke {text}',
+    template = 'Summarize the following text \n {text}'
     input_variables=['text']
 )
+
 parser = StrOutputParser()
 
-chain = RunnableSequence(prompt1,model,parser,prompt2,model,parser)
+report_gen_chain = RunnableSequence(prompt1,model,parser)
 
-print(chain.invoke({'topic':'AI'}))
+branch_chain= RunnableBranch(
+    (),
+)
